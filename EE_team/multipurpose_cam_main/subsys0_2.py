@@ -79,9 +79,9 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
 # ====================================================================================================================
             # lifting all of the keypoints to 3D based on the depthmap readings
             if datum.poseKeypoints is not None:
-                people_3D = [[0]*datum.poseKeypoints[0]] * len(datum.poseKeypoints)
-
-                for person in range(len(datum.poseKeypoints)):                    
+                people_3D = []
+                for person in range(len(datum.poseKeypoints)):
+                    person3D = []                  
                     for keypoint in range(len(datum.poseKeypoints[person])):
                         (X,Y,confidence) = datum.poseKeypoints[person][keypoint]
                         #this is the default value if keypoint is not detected
@@ -90,7 +90,9 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         else:
                             Z = disparity_normalized[int(Y)][int(X)]
                         # the Z value is in centimeters by default
-                        people_3D[person][keypoint] = [X,Y,Z]
+                        person3D.append([X,Y,Z])
+                    people_3D.append(person3D)
+                people_3D = np.array(people_3D)
                         
                 if verbose:
                     print("coordinates of 3D lifted people")
@@ -100,31 +102,49 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                 # now we can iterate through to determine distances between people
                 num_people = len(datum.poseKeypoints)
                 # create a matrix so that mat[p0][p1] refers to distance from p0 to p1
-                depth_pairs = [[0]*num_people] * num_people
+                depth_pairs = []
                 # body_25 model point which labels the torso of a person
                 torso_keypoint = 1
                 for person1 in range(num_people):
+                    depth_pair = []
                     for person2 in range(num_people):
                         # if person or equal or keypoint (chest) is not detected on either person, skip the calculation
                             # failsafe distance: 0
                         if (person1 == person2) or (people_3D[person1][torso_keypoint] == [0,0,0]).all() or (people_3D[person2][torso_keypoint] == [0,0,0]).all():
                             distance_between = 0
                         else:
-                            distance_between = abs(people_3D[person1][torso_keypoint][2] - people_3D[person2][torso_keypoint])
-                    depth_pairs[person1][person2] = distance_between
+                            distance_between = abs(people_3D[person1][torso_keypoint][2] - people_3D[person2][torso_keypoint][2])
+                        depth_pair.append(distance_between)
+                    depth_pairs.append(depth_pair)
+                depth_pairs = np.array(depth_pairs)
 
                 if verbose:
                     print("matrix of pairs of people and distances between")
                     print(depth_pairs)
+
+                font = cv2.FONT_HERSHEY_COMPLEX
+                scale = 1
+                color = (255,255,255)
+                thickness = 1
+                lineType = 2
+
+                for person1 in range(num_people):
+                    for person2 in range(num_people):
+                        if person1 > person2:
+                            distance_between = depth_pairs[person1][person2]
+                            (X0,Y0,Z0) = people_3D[person1][torso_keypoint]
+                            (X1,Y1,Z1) = people_3D[person2][torso_keypoint]
+                            cv2.line(imageToProcess,(int(X0),int(Y0)),(int(X1),int(Y1)),(255,0,0),5)
+                            cv2.putText(imageToProcess,"{}cm".format(depth_pairs[person1][person2]),(int((X0+X1)/2),int((Y0+Y1)/2)),
+                                    font, scale, color, thickness, lineType)
 # ====================================================================================================================
         if verbose:
             print("Body keypoints: \n" + str(datum.poseKeypoints))
-
         # Display Image
         if displaymode: 
             if run_openpose: 
                 time_show_in = time()        
-                cv2.imshow("output display",datum.cvOutputData)                
+                cv2.imshow("output display",imageToProcess)                
                 time_show_fi = time()
             else:
                 cv2.imshow("output display",imageToProcess)
