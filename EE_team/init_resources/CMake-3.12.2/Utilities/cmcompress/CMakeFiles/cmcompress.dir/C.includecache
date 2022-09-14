@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/smart-camera/Downloads/CMake-3.12.2/Utilities/cmcompress/cmcompress.c
+cmcompress.h
+/home/smart-camera/Downloads/CMake-3.12.2/Utilities/cmcompress/cmcompress.h
+errno.h
+-
+string.h
+-
+
+/home/smart-camera/Downloads/CMake-3.12.2/Utilities/cmcompress/cmcompress.h
+stdio.h
+-
+
