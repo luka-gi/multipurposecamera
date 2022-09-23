@@ -1,0 +1,13 @@
+# Target labels
+ openpose_lib
+# Source files and their labels
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/CMakeFiles/openpose_lib
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/CMakeFiles/openpose_lib.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/CMakeFiles/openpose_lib-complete.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/caffe/src/openpose_lib-stamp/openpose_lib-install.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/caffe/src/openpose_lib-stamp/openpose_lib-mkdir.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/caffe/src/openpose_lib-stamp/openpose_lib-download.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/caffe/src/openpose_lib-stamp/openpose_lib-update.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/caffe/src/openpose_lib-stamp/openpose_lib-patch.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/caffe/src/openpose_lib-stamp/openpose_lib-configure.rule
+/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build/caffe/src/openpose_lib-stamp/openpose_lib-build.rule
