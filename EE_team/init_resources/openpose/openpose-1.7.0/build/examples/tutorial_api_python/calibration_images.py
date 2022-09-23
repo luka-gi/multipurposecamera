@@ -60,7 +60,7 @@ def gstreamer_pipeline(
 #     )
 def show_camera():
 
-    cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0),cv2.CAP_GSTREAMER)
+    cap = cv2.VideoCapture(gstreamer_pipeline(),cv2.CAP_GSTREAMER)
     # cap2 = cv2.VideoCapture(gstreamer_pipeline2(flip_method=0),cv2.CAP_GSTREAMER)
 
     num = 0
