@@ -1,6 +1,8 @@
 import cv2
 import sys
 import time
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 #building gstreamer pipeline
@@ -34,8 +36,10 @@ def gstreamer_pipeline(
 def cam_img_cap(img_path = "/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/multipurpose_cam_main/imgs/test/test.png"):
     start_time = time.time()
     cap = cv2.VideoCapture(gstreamer_pipeline(),cv2.CAP_GSTREAMER)
-    print("EXEC TIME:",1000*(time.time()-start_time))
+    cap_time = time.time()
+    print("CAP TIME:",(cap_time-start_time))
     success, img = cap.read()
+    print("READ TIME: ",(time.time()-cap_time))
     if success:
         cv2.imwrite(img_path,img)
         print("\ncamera capture: success\n")
