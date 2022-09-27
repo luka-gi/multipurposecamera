@@ -4,10 +4,11 @@ import sys
 import keyboard
 
 displaymode = False
+verbose = False
 
 #venv paths
 NVIDIA_python2_path = "/usr/bin/python"
-cam_img_cap = "/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/multipurpose_cam_main/util/cam_img_cap.py"
+cam_img_cap = "/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/multipurpose_cam_main/utils/cam_img_cap.py"
 
 #other paths
 openpose_build_path = "/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openpose-1.7.0/build"
@@ -15,10 +16,20 @@ image_path = "./imgs/live_test/"
 sys.path.append(openpose_build_path + '/python')
 from openpose import pyopenpose as op
 
-def testcode():
-    print("Python version: "+str(sys.version_info.major)+"."+str(sys.version_info.minor)+"."+str(sys.version_info.micro)+"\n")
+# device id of camera we analyze openpose images from
+openpose_device_id = 1
+
+def capture_img(cap, image_path):
+    success, img = cap.read()
+    if success:
+        cv2.imwrite(image_path,img)
+        print("\ncamera capture: success\n")
+    else:
+        print("\ncamera capture: failure\n")
+    return img
 
 def live_to_openpose():
+    cap = cv2.VideoCapture(openpose_device_id)
     opWrapper = op.WrapperPython()
     opWrapper.configure({"model_folder":openpose_build_path + "/../models/"})
     opWrapper.start()
@@ -27,10 +38,11 @@ def live_to_openpose():
 
     while key != ord('q'):
         #run the camera cap module
-        subprocess.run([NVIDIA_python2_path,cam_img_cap,image_path+"live.png"])
+        # subprocess.run([NVIDIA_python2_path,cam_img_cap,image_path+"live.png"])
 
         datum = op.Datum()
-        imageToProcess = cv2.imread(image_path+"live.png")
+        # imageToProcess = cv2.imread(image_path+"live.png")
+        imageToProcess = capture_img(cap, image_path+"live.png")
         datum.cvInputData = imageToProcess
         opWrapper.emplaceAndPop(op.VectorDatum([datum]))
 
@@ -39,10 +51,10 @@ def live_to_openpose():
         cv2.imwrite(image_path+"op.png",datum.cvOutputData)
 
         if displaymode:          
-            cv2.imshow("before op",imageToProcess)
             cv2.imshow("after op",datum.cvOutputData)
             key = cv2.waitKey(5)
 
+    cap.release()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":   

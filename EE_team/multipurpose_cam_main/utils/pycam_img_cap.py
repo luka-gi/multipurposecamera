@@ -1,6 +1,7 @@
 import cv2
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
 
 def pixel (img):
     img = img.astype(np.float64) 
@@ -39,7 +40,7 @@ def rgb2gray(img):
     return res
 
 def pycam_img_cap(img_path = "./test.png"):
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     success, img = cap.read()
 
     # plt.imshow(img)
@@ -48,11 +49,12 @@ def pycam_img_cap(img_path = "./test.png"):
 
     # img = cv2.imread(img_path)
  
-    img = np.asarray(img, dtype=np.uint8)
-    colour = cv2.cvtColor(img, cv2.COLOR_BAYER_GBGB2BGR)
-    plt.imshow(colour)
-    plt.title ('color image by open cv')
-    plt.imsave('color_image_by_opencv.png', colour)
+    # print(img.shape)
+    # img = np.asarray(img, dtype=np.uint8)
+    # colour = cv2.cvtColor(img, cv2.COLOR_BAYER_RG2RGB)
+    # plt.imshow(colour)
+    # plt.title ('color image by open cv')
+    # plt.imsave('color_image_by_opencv.png', colour)
 
     if success:
         cv2.imwrite(img_path,img)
