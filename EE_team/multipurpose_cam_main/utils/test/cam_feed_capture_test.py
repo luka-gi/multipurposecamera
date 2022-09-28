@@ -1,36 +1,4 @@
 import cv2
-import sys
-import time
-import subprocess
-
-from PIL import Image
-
-openpose_venv_path = "/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/init_resources/openpose/openposevenv/bin/python"
-body_to_skel_path = "/home/smartcam/Desktop/EE_code/multipurposecamera/EE_team/multipurpose_cam_main/capture_to_skel.py"
-args = [openpose_venv_path,body_to_skel_path]
-
-def run(*popenargs, **kwargs):
-    input = kwargs.pop("input", None)
-    check = kwargs.pop("handle", False)
-
-    if input is not None:
-        if 'stdin' in kwargs:
-            raise ValueError('stdin and input arguments may not both be used.')
-        kwargs['stdin'] = subprocess.PIPE
-
-    process = subprocess.Popen(*popenargs, **kwargs)
-    try:
-        stdout, stderr = process.communicate(input)
-    except:
-        process.kill()
-        process.wait()
-        raise
-    retcode = process.poll()
-    if check and retcode:
-        raise subprocess.CalledProcessError(
-            retcode, process.args, output=stdout, stderr=stderr)
-    return retcode, stdout, stderr
-
 
 def gstreamer_pipeline(
     sensor_id=0,

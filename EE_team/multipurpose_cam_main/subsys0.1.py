@@ -1,10 +1,11 @@
-import subprocess
 import cv2
 import sys
-import keyboard
+import argparse
 
 displaymode = False
 verbose = False
+run_openpose = False
+write_images = False
 
 #venv paths
 NVIDIA_python2_path = "/usr/bin/python"
@@ -22,10 +23,13 @@ openpose_device_id = 1
 def capture_img(cap, image_path):
     success, img = cap.read()
     if success:
-        cv2.imwrite(image_path,img)
-        print("\ncamera capture: success\n")
+        if write_images:
+            cv2.imwrite(image_path,img)
+        if verbose:
+            print("\ncamera capture: success\n")
     else:
-        print("\ncamera capture: failure\n")
+        if verbose:
+            print("\ncamera capture: failure\n")
     return img
 
 def live_to_openpose():
@@ -37,36 +41,53 @@ def live_to_openpose():
     key = 0
 
     while key != ord('q'):
-        #run the camera cap module
-        # subprocess.run([NVIDIA_python2_path,cam_img_cap,image_path+"live.png"])
-
         datum = op.Datum()
-        # imageToProcess = cv2.imread(image_path+"live.png")
+
         imageToProcess = capture_img(cap, image_path+"live.png")
-        datum.cvInputData = imageToProcess
-        opWrapper.emplaceAndPop(op.VectorDatum([datum]))
+
+        if run_openpose:
+            datum.cvInputData = imageToProcess
+            opWrapper.emplaceAndPop(op.VectorDatum([datum]))
+            if write_images:
+                cv2.imwrite(image_path+"op.png",datum.cvOutputData)
+
+        if verbose:
+            print("Body keypoints: \n" + str(datum.poseKeypoints))
 
         # Display Image
-        print("Body keypoints: \n" + str(datum.poseKeypoints))
-        cv2.imwrite(image_path+"op.png",datum.cvOutputData)
-
-        if displaymode:          
-            cv2.imshow("after op",datum.cvOutputData)
+        if displaymode: 
+            if run_openpose:         
+                cv2.imshow("output display",datum.cvOutputData)
+            else:
+                cv2.imshow("output display",imageToProcess)
             key = cv2.waitKey(5)
 
     cap.release()
     cv2.destroyAllWindows()
 
-if __name__ == "__main__":   
-    # subprocess.run([NVIDIA_python2_path,"--version"])
-    if len(sys.argv)==1:
-        print("shell script in regular mode")
-        print("Please ensure that you are only running this from the bash script. Python version should be 3.6.9")
-        print("Python version: "+str(sys.version_info.major)+"."+str(sys.version_info.minor)+"."+str(sys.version_info.micro)+"\n")
-        live_to_openpose()
-    elif len(sys.argv)==2 and (sys.argv[1] == "-d" or sys.argv[1] == "--display"):
-        print("shell script in display mode")
-        displaymode = True
-        live_to_openpose()
-    else:
-        print("incorrect arguments")
+if __name__ == "__main__":  
+    parser = argparse.ArgumentParser(description='Args for multipurposecamera script. All false by default')
+    parser.add_argument('-v','--verbose', action='store_true', help='verbose output')
+    parser.add_argument('-d','--display', action='store_true', help='display images to monitor')
+    parser.add_argument('-p','--process', action='store_true', help='process using openpose (default off to save memory)')
+    parser.add_argument('-w','--write', action='store_true', help='save images to disk')
+    parser.add_argument('-a','--all', action='store_true', help='enable all options')
+
+    args = parser.parse_args()
+
+    displaymode = args.display or args.all
+    verbose = args.verbose or args.all
+    run_openpose = args.process or args.all
+    write_images = args.write or args.all
+
+    if verbose:
+        print("\nrunning with arguments:\n")
+        print("verbose =",verbose)
+        print("display =",displaymode)
+        print("process =",run_openpose)
+        print("write =",write_images)
+
+    print("\nPlease ensure that you are only running this from the bash script. Python version should be 3.6.9")
+    print("Python version: "+str(sys.version_info.major)+"."+str(sys.version_info.minor)+"."+str(sys.version_info.micro)+"\n")
+
+    live_to_openpose()
