@@ -1,1 +1,0 @@
-/home/smart-camera/Downloads/CMake-3.12.2

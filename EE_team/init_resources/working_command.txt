@@ -1,3 +1,0 @@
-# copy this and run in openpose/openpose-1.7.0
-./build/examples/openpose/openpose.bin --video ./examples/media/video.avi --net_resolution 256x128
-

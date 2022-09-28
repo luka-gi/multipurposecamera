@@ -1,2 +1,0 @@
-/home/smart-camera/Downloads/CMake-3.12.2/Source/Checks/Curses-build/CMakeFiles/rebuild_cache.dir
-/home/smart-camera/Downloads/CMake-3.12.2/Source/Checks/Curses-build/CMakeFiles/edit_cache.dir
