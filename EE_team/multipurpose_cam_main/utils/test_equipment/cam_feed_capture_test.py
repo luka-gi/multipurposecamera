@@ -27,43 +27,17 @@ def gstreamer_pipeline(
         )
     )
 
-# def gstreamer_pipeline2(
-#     sensor_id=1,
-#     capture_width=3280,
-#     capture_height=2464,
-#     display_width=960,
-#     display_height=540,
-#     framerate=10,
-#     flip_method=0,
-# ):
-#     return (
-#         "nvarguscamerasrc sensor-id=%d !"
-#         "video/x-raw(memory:NVMM), width=(int)%d, height=(int)%d, framerate=(fraction)%d/1 ! "
-#         "nvvidconv flip-method=%d ! "
-#         "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
-#         "videoconvert ! "
-#         "video/x-raw, format=(string)BGR ! appsink"
-#         % (
-#             sensor_id,
-#             capture_width,
-#             capture_height,
-#             framerate,
-#             flip_method,
-#             display_width,
-#             display_height,
-#         )
-#     )
 def show_camera():
 
-    cap = cv2.VideoCapture(gstreamer_pipeline(),cv2.CAP_GSTREAMER)
-    # cap2 = cv2.VideoCapture(gstreamer_pipeline2(flip_method=0),cv2.CAP_GSTREAMER)
+    cap0 = cv2.VideoCapture(gstreamer_pipeline(0),cv2.CAP_GSTREAMER)
+    cap1 = cv2.VideoCapture(gstreamer_pipeline(1),cv2.CAP_GSTREAMER)
 
     num = 0
 
-    while cap.isOpened():
+    while cap0.isOpened() and cap1.isOpened():
 
-        succes1, img = cap.read()
-        # succes2, img2 = cap2.read()
+        success0, img0 = cap0.read()
+        success1, img1 = cap1.read()
 
         k = cv2.waitKey(5)
 
@@ -83,12 +57,12 @@ def show_camera():
             # print(success)
             # num += 1
 
-        cv2.imshow('Img 1',img)
-        # cv2.imshow('Img 2',img2)
+        cv2.imshow('Img 0',img0)
+        cv2.imshow('Img 1',img1)
 
     # Release and destroy all windows before termination
-    cap.release()
-    # cap2.release()
+    cap0.release()
+    cap1.release()
 
     cv2.destroyAllWindows()
 
