@@ -42,11 +42,11 @@ def compute_openpose(opWrapper, datum, imageToProcess):
 
 def live_to_openpose():
     capth = cv2.VideoCapture(thermal_device_id)
-    cap = cv2.VideoCapture(openpose_device_id)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
+    #cap = cv2.VideoCapture(openpose_device_id)
+    #cap.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
     capth.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
 
-    if not cap.isOpened():
+    if not capth.isOpened():
         print("Please make sure 'openpose_device_id' is set to the correct device.")
         print("It is currently /dev/video" + str(openpose_device_id))
     else:
@@ -59,15 +59,15 @@ def live_to_openpose():
 
         while key != ord('q'):
 
-            datum_stereo = op.Datum()
+            #datum_stereo = op.Datum()
             datum_thermal = op.Datum()
 
             time_imcap_th_be = time.time()
             thermalImageToProcess = capture_img(capth, image_path+"liveth.png", "thermal")
             time_imcap_th_fi = time.time()
-            time_imcap_st_be = time.time()
-            imageToProcess = capture_img(cap, image_path+"live.png", "stereo")
-            time_imcap_st_fi = time.time()
+            #time_imcap_st_be = time.time()
+            #imageToProcess = capture_img(cap, image_path+"live.png", "stereo")
+            #time_imcap_st_fi = time.time()
 
             images_discarded_from_buffer = images_discarded_from_buffer + 1
             if run_openpose and images_discarded_from_buffer >= IMG_BUFFER_DISCARD:
@@ -77,56 +77,56 @@ def live_to_openpose():
                 compute_openpose(opWrapper,datum_thermal,thermalImageToProcess)
                 time_comp_th_fi=time.time()
 
-                time_comp_st_be=time.time()
-                compute_openpose(opWrapper,datum_stereo,imageToProcess)
-                time_comp_st_fi=time.time()
+                #time_comp_st_be=time.time()
+                #compute_openpose(opWrapper,datum_stereo,imageToProcess)
+                #time_comp_st_fi=time.time()
 
                 if write_images:
-                    cv2.imwrite(image_path+"op.png",datum_stereo.cvOutputData)
+                    #cv2.imwrite(image_path+"op.png",datum_stereo.cvOutputData)
                     cv2.imwrite(image_path+"th.png",datum_thermal.cvOutputData)
 
             if verbose:
-                print("Body keypoints: \n" + str(datum_stereo.poseKeypoints))
+                #print("Body keypoints: \n" + str(datum_stereo.poseKeypoints))
                 print("Thermal keypoints: \n" + str(datum_thermal.poseKeypoints))
 
             # Display Image
             if displaymode: 
                 if run_openpose:
-                    time_show_st_be = time.time()         
-                    cv2.imshow("output display",datum_stereo.cvOutputData)
-                    time_show_st_fi = time.time() 
+                    #time_show_st_be = time.time()         
+                    #cv2.imshow("output display",datum_stereo.cvOutputData)
+                    #time_show_st_fi = time.time() 
                     time_show_th_be = time.time() 
                     cv2.imshow("thermal display",datum_thermal.cvOutputData)
                     time_show_th_fi = time.time()
 
                     delay_imcap_th = time_imcap_th_fi-time_imcap_th_be
-                    delay_imcap_st = time_imcap_st_fi-time_imcap_st_be
+                    #delay_imcap_st = time_imcap_st_fi-time_imcap_st_be
                     delay_comp_th = time_comp_th_fi-time_comp_th_be
-                    delay_comp_st = time_comp_st_fi-time_comp_st_be
+                    #delay_comp_st = time_comp_st_fi-time_comp_st_be
                     delay_show_th = time_show_th_fi-time_show_th_be
-                    delay_show_st = time_show_st_fi-time_show_st_be
+                    #delay_show_st = time_show_st_fi-time_show_st_be
                     print("   TIMES:") 
                     print("\tCAP TIMES:")
                     print("\t\tTHERMAL:",delay_imcap_th)
-                    print("\t\tSTEREO:",delay_imcap_st)
+                    #print("\t\tSTEREO:",delay_imcap_st)
                     print("\tCOMP TIMES:")
                     print("\t\tTHERMAL:",delay_comp_th)
-                    print("\t\tSTEREO:",delay_comp_st)
+                    #print("\t\tSTEREO:",delay_comp_st)
                     print("\tSHOW TIMES:")
                     print("\t\tTHERMAL:",delay_show_th)
-                    print("\t\tSTEREO:",delay_show_st)
+                    #print("\t\tSTEREO:",delay_show_st)
                     print("\tSINGLE CYCLE DELAY:")
                     print("\t\tTHERMAL DELAY:",delay_imcap_th+delay_comp_th+delay_show_th)
-                    print("\t\tSTEREO DELAY:",delay_imcap_st+delay_comp_st+delay_show_st)
-                    print("\t\tTOTAL DELAY:",delay_imcap_th+delay_comp_th+delay_show_th+delay_imcap_st+delay_comp_st+delay_show_st)
+                    #print("\t\tSTEREO DELAY:",delay_imcap_st+delay_comp_st+delay_show_st)
+                    #print("\t\tTOTAL DELAY:",delay_imcap_th+delay_comp_th+delay_show_th+delay_imcap_st+delay_comp_st+delay_show_st)
                 else:
-                    cv2.imshow("output display",imageToProcess)
+                    #cv2.imshow("output display",imageToProcess)
 
                     cv2.imshow("thermal display",thermalImageToProcess)
 
                 key = cv2.waitKey(1)
 
-        cap.release()
+        #cap.release()
         capth.release()
         cv2.destroyAllWindows()
 
