@@ -6,6 +6,7 @@ displaymode = False
 verbose = False
 run_openpose = False
 write_images = False
+openpose_device_id = 3
 
 #venv paths
 NVIDIA_python2_path = "/usr/bin/python"
@@ -18,7 +19,6 @@ sys.path.append(openpose_build_path + '/python')
 from openpose import pyopenpose as op
 
 # device id of camera we analyze openpose images from
-openpose_device_id = 3
 
 def capture_img(cap, image_path):
     success, img = cap.read()
@@ -76,6 +76,7 @@ if __name__ == "__main__":
     parser.add_argument('-p','--process', action='store_true', help='process using openpose (default off to save memory)')
     parser.add_argument('-w','--write', action='store_true', help='save images to disk')
     parser.add_argument('-a','--all', action='store_true', help='enable all options')
+    parser.add_argument('--device', type=int, help='specify device number')
 
     args = parser.parse_args()
 
@@ -83,6 +84,10 @@ if __name__ == "__main__":
     verbose = args.verbose or args.all
     run_openpose = args.process or args.all
     write_images = args.write or args.all
+    if (args.device == 2 or args.device == 3 or args.device == 4):
+        openpose_device_id = args.device
+    else:
+        print("\nDevice ID not valid. --device 2 for thermal, --device 3 for stereo left, and --device 4 for stereo right.\n")
 
     if verbose:
         print("\nrunning with arguments:\n")
@@ -90,6 +95,7 @@ if __name__ == "__main__":
         print("display =",displaymode)
         print("process =",run_openpose)
         print("write =",write_images)
+        print("using device /dev/video"+str(openpose_device_id))
 
     if not (verbose or displaymode or run_openpose or write_images or args.all):
         print("\n=====================================================================")
