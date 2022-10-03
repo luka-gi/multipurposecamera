@@ -11,6 +11,8 @@ run_openpose = False
 write_images = False
 thermal_device_id = 2
 openpose_device_id = 3
+IMG_BUFFER_DISCARD = 1
+CAP_BUFFER_SIZE = 1
 
 #venv paths
 NVIDIA_python2_path = "/usr/bin/python"
@@ -41,6 +43,8 @@ def compute_openpose(opWrapper, datum, imageToProcess):
 def live_to_openpose():
     capth = cv2.VideoCapture(thermal_device_id)
     cap = cv2.VideoCapture(openpose_device_id)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
+    capth.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
 
     if not cap.isOpened():
         print("Please make sure 'openpose_device_id' is set to the correct device.")
@@ -51,8 +55,10 @@ def live_to_openpose():
         opWrapper.start()
 
         key = 0
+        images_discarded_from_buffer = IMG_BUFFER_DISCARD
 
         while key != ord('q'):
+
             datum_stereo = op.Datum()
             datum_thermal = op.Datum()
 
@@ -63,19 +69,18 @@ def live_to_openpose():
             imageToProcess = capture_img(cap, image_path+"live.png", "stereo")
             time_imcap_st_fi = time.time()
 
-            if run_openpose:
+            images_discarded_from_buffer = images_discarded_from_buffer + 1
+            if run_openpose and images_discarded_from_buffer >= IMG_BUFFER_DISCARD:
+                images_discarded_from_buffer = 0
 
                 time_comp_th_be=time.time()
-                #compute_openpose(opWrapper,datum_thermal,thermalImageToProcess)
-                th_process = Process(target=compute_openpose,args=(opWrapper,datum_thermal,thermalImageToProcess))
-                th_process.start()
+                compute_openpose(opWrapper,datum_thermal,thermalImageToProcess)
                 time_comp_th_fi=time.time()
 
                 time_comp_st_be=time.time()
                 compute_openpose(opWrapper,datum_stereo,imageToProcess)
                 time_comp_st_fi=time.time()
 
-                th_process.wait()
                 if write_images:
                     cv2.imwrite(image_path+"op.png",datum_stereo.cvOutputData)
                     cv2.imwrite(image_path+"th.png",datum_thermal.cvOutputData)
@@ -116,10 +121,9 @@ def live_to_openpose():
                     print("\t\tTOTAL DELAY:",delay_imcap_th+delay_comp_th+delay_show_th+delay_imcap_st+delay_comp_st+delay_show_st)
                 else:
                     cv2.imshow("output display",imageToProcess)
-                    #process_imshow_st=Process(target=cv2.imshow,args=("output display",imageToProcess))
-                    #process_imshow_st.start()
+
                     cv2.imshow("thermal display",thermalImageToProcess)
-                    #process_imshow_st.join()
+
                 key = cv2.waitKey(1)
 
         cap.release()

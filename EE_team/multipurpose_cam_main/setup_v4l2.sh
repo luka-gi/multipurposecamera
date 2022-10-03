@@ -2,7 +2,7 @@
 
 # user-set variables to change the stream options
 # i don't know how gstreamer works so be careful changing these
-# I know that two display options work: 1024x512 and 512x256
+# I know that two capture options work: 1024x512 and 512x256
 SENSOR_IMXL=0
 SENSOR_IMXR=1
 SENSOR_IMXL_LOOPBACK=3
