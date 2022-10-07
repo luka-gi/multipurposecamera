@@ -1,6 +1,6 @@
 # multipurposecamera main codebase
  
-# TLDR - run shell scripts v4l2_setup.sh and subsystem0.1.sh. use arguments -v for verbose and -d for display
+# TLDR - run "./main_test_system.sh" and add -h for a list and description of arguments 
 
 # BEFORE YOU BEGIN:
 
@@ -24,6 +24,6 @@ We need the camera code to be able to run sequentially. A photo must finish writ
 ### Follow the instructions on their repo and run setup_v4l2.sh.
 
 ## As of now one subsystem works. Run the shell file to run in the correct python environment.
-## use arguments -v for verbose and -d for display
+## use arguments -h for help and argument descriptions, -v for verbose and -d for display
 
 
