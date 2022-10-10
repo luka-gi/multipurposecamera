@@ -1,2 +1,3 @@
 *.ogv
 /EE_team/resources/record_tests/*
+/EE_team/.token.txt
