@@ -72,19 +72,23 @@ def subsys0_1(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                 else:
                     cv2.imshow("output display",imageToProcess)
                 if verbose:
-                    delay_cap = time_cap_fi-time_cap_in
-                    delay_comp = time_comp_fi-time_comp_in
-                    delay_show = time_show_fi-time_show_in
+                    delay_cap = time_cap_fi-time_cap_in                        
 
                     print("   TIMES:") 
                     print("\tCAP TIMES:")
-                    print("\t\tTHERMAL:",delay_cap)
-                    print("\tCOMP TIMES:")
-                    print("\t\tTHERMAL:",delay_comp)
-                    print("\tSHOW TIMES:")
-                    print("\t\tTHERMAL:",delay_show)
+                    print("\t\tSTEREO CAP:",delay_cap)
+                    if run_openpose:
+                        delay_show = time_show_fi-time_show_in
+                        delay_comp = time_comp_fi-time_comp_in
+                        print("\tCOMP TIMES:")
+                        print("\t\tSTEREO COMP:",delay_comp)
+                        print("\tSHOW TIMES:")
+                        print("\t\tSTEREO SHOW:",delay_show)
                     print("\tSINGLE CYCLE DELAY:")
-                    print("\t\tTHERMAL DELAY:",delay_cap+delay_comp+delay_show)
+                    if run_openpose:
+                        print("\t\tTOTAL STEREO DELAY:",delay_cap+delay_comp+delay_show)
+                    else:
+                        print("\t\tTOTAL STEREO DELAY:",delay_cap)
                 key = cv2.waitKey(1)
 
         cap.release()
