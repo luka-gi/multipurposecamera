@@ -85,43 +85,45 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
             # Display Image
             if displaymode: 
                 if run_openpose:
-                    #time_show_st_be = time.time() 
-                    img_l = datum.cvOutputData 
-                    x_offset = 280
-                    y_offset = 160
-                    x_scale = 6
-                    y_scale = 4
-                    thermalImageToProcess = cv2.resize(thermalImageToProcess,(thermalImageToProcess.shape[1]*x_scale,thermalImageToProcess.shape[0]*y_scale)) 
-                    print("stereo img shape",img_l.shape)
+                    time_show_be = time.time() 
+                    img_combined = datum.cvOutputData 
+
+                    # the following comments assume subject is about 0.5 m from camera
+                    x_offset = 285 #the following values were experimentally obtained
+                    y_offset = 125 #seems to work on left camera with respective values:
+                    x_scale = 5.65    #280,160,6,4
+                    y_scale = 4.5
+                    thermalImageToProcess = cv2.resize(thermalImageToProcess,(int(thermalImageToProcess.shape[1]*x_scale),int(thermalImageToProcess.shape[0]*y_scale))) 
+                    print("stereo img shape",img_combined.shape)
                     print("thermal img shape",thermalImageToProcess.shape)
 
-                    img_l[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
-                    cv2.imshow("output display",img_l)
-                    #time_show_st_fi = time.time() 
+                    img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
+                    cv2.imshow("output display",img_combined)
+                    time_show_fi = time.time() 
                     # time_show_th_be = time.time() 
                     # cv2.imshow("thermal display",datum_thermal.cvOutputData)
                     # time_show_th_fi = time.time()
 
                     delay_imcap_th = time_imcap_th_fi-time_imcap_th_be
-                    #delay_imcap_st = time_imcap_st_fi-time_imcap_st_be
+                    delay_imcap_st = time_imcap_st_fi-time_imcap_st_be
                     # delay_comp_th = time_comp_th_fi-time_comp_th_be
-                    #delay_comp_st = time_comp_st_fi-time_comp_st_be
-                    # delay_show_th = time_show_th_fi-time_show_th_be
+                    delay_comp_st = time_comp_st_fi-time_comp_st_be
+                    delay_show = time_show_fi-time_show_be
                     #delay_show_st = time_show_st_fi-time_show_st_be
                     print("   TIMES:") 
                     print("\tCAP TIMES:")
                     print("\t\tTHERMAL:",delay_imcap_th)
-                    #print("\t\tSTEREO:",delay_imcap_st)
+                    print("\t\tSTEREO:",delay_imcap_st)
                     print("\tCOMP TIMES:")
                     # print("\t\tTHERMAL:",delay_comp_th)
-                    #print("\t\tSTEREO:",delay_comp_st)
-                    print("\tSHOW TIMES:")
-                    # print("\t\tTHERMAL:",delay_show_th)
+                    print("\t\tSTEREO:",delay_comp_st)
+                    print("\tSHOW TIME:")
+                    print("\t\tSHOW DELAY:",delay_show)
                     #print("\t\tSTEREO:",delay_show_st)
                     print("\tSINGLE CYCLE DELAY:")
-                    # print("\t\tTHERMAL DELAY:",delay_imcap_th+delay_comp_th+delay_show_th)
-                    #print("\t\tSTEREO DELAY:",delay_imcap_st+delay_comp_st+delay_show_st)
-                    #print("\t\tTOTAL DELAY:",delay_imcap_th+delay_comp_th+delay_show_th+delay_imcap_st+delay_comp_st+delay_show_st)
+                    print("\t\tTHERMAL DELAY:",delay_imcap_th)
+                    print("\t\tSTEREO DELAY:",delay_imcap_st+delay_comp_st)
+                    print("\t\tTOTAL DELAY:",delay_imcap_th+delay_show+delay_imcap_st+delay_comp_st)
                 else:
                     #cv2.imshow("output display",imageToProcess)
 
