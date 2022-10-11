@@ -1,6 +1,6 @@
 import sys
 import argparse
-from subsys0_1 import subsys0_1
+import subsys0_1,subsys0_3
 
 if __name__ == "__main__":  
     parser = argparse.ArgumentParser(description='Args for multipurposecamera script. All false by default')
@@ -29,7 +29,7 @@ if __name__ == "__main__":
         print("\nInvalid argument for subsystem\n")
         sys.exit()
 
-    if not ((subsystem_to_test == 0 or subsystem_to_test == 1) and (openpose_device_id == 3 or openpose_device_id == 4)):
+    if not (openpose_device_id == 3 or openpose_device_id == 4):
         print("\nDevice ID not valid. --device 3 for stereo left and --device 4 for stereo right.\n(check device settings or restart in case this changed)\n")
         sys.exit()
 
@@ -55,11 +55,11 @@ if __name__ == "__main__":
     if subsystem_to_test == 0:
         print()
     if subsystem_to_test == 1:
-        subsys0_1(*args)
+        subsys0_1.run(*args)
     if subsystem_to_test == 2:
         print()
     if subsystem_to_test == 3:
-        print()
+        subsys0_3.run(*args)
     if subsystem_to_test == 4:
         print()
     if subsystem_to_test == 5:

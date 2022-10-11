@@ -28,11 +28,8 @@ def capture_img(cap, image_path, capname, displaymode,verbose,run_openpose,write
             print("\n{} camera cap: failure".format(capname))
     return img
 
-def compute_openpose(opWrapper, datum, imageToProcess):
-    datum.cvInputData = imageToProcess
-    opWrapper.emplaceAndPop(op.VectorDatum([datum]))
 
-def subsys0_3(displaymode,verbose,run_openpose,write_images,openpose_device_id):
+def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
     args = (displaymode,verbose,run_openpose,write_images,openpose_device_id)
 
     capth = cv2.VideoCapture(thermal_device_id)
@@ -53,14 +50,14 @@ def subsys0_3(displaymode,verbose,run_openpose,write_images,openpose_device_id):
 
         while key != ord('q'):
 
-            datum_stereo = op.Datum()
+            datum = op.Datum()
             # datum_thermal = op.Datum()
 
             time_imcap_th_be = time.time()
             thermalImageToProcess = capture_img(capth, image_path+"liveth.png", "thermal", *args)
             time_imcap_th_fi = time.time()
             time_imcap_st_be = time.time()
-            imageToProcess = capture_img(cap, image_path+"live.png", "stereo")
+            imageToProcess = capture_img(cap, image_path+"live.png", "stereo", *args)
             time_imcap_st_fi = time.time()
 
             if run_openpose:
@@ -71,7 +68,8 @@ def subsys0_3(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                 # time_comp_th_fi=time.time()
 
                 time_comp_st_be=time.time()
-                compute_openpose(opWrapper,datum_stereo,imageToProcess)
+                datum.cvInputData = imageToProcess
+                opWrapper.emplaceAndPop(op.VectorDatum([datum]))
                 time_comp_st_fi=time.time()
 
                 if write_images:
@@ -87,8 +85,18 @@ def subsys0_3(displaymode,verbose,run_openpose,write_images,openpose_device_id):
             # Display Image
             if displaymode: 
                 if run_openpose:
-                    #time_show_st_be = time.time()         
-                    #cv2.imshow("output display",datum_stereo.cvOutputData)
+                    #time_show_st_be = time.time() 
+                    img_l = datum.cvOutputData 
+                    x_offset = 280
+                    y_offset = 160
+                    x_scale = 6
+                    y_scale = 4
+                    thermalImageToProcess = cv2.resize(thermalImageToProcess,(thermalImageToProcess.shape[1]*x_scale,thermalImageToProcess.shape[0]*y_scale)) 
+                    print("stereo img shape",img_l.shape)
+                    print("thermal img shape",thermalImageToProcess.shape)
+
+                    img_l[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
+                    cv2.imshow("output display",img_l)
                     #time_show_st_fi = time.time() 
                     # time_show_th_be = time.time() 
                     # cv2.imshow("thermal display",datum_thermal.cvOutputData)

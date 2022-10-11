@@ -27,7 +27,7 @@ def capture_img(cap, image_path, displaymode,verbose,run_openpose,write_images,o
             print("\ncamera capture: failure\n")
     return img
 
-def subsys0_1(displaymode,verbose,run_openpose,write_images,openpose_device_id):
+def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
     args = (displaymode,verbose,run_openpose,write_images,openpose_device_id)
 
     cap = cv2.VideoCapture(openpose_device_id)
