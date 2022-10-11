@@ -41,9 +41,10 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
         print("Please make sure 'openpose_device_id' is set to the correct device.")
         print("It is currently /dev/video" + str(openpose_device_id))
     else:
-        opWrapper = op.WrapperPython()
-        opWrapper.configure({"model_folder":openpose_build_path + "/../models/"})
-        opWrapper.start()
+        if run_openpose:
+            opWrapper = op.WrapperPython()
+            opWrapper.configure({"model_folder":openpose_build_path + "/../models/"})
+            opWrapper.start()
 
         key = 0
         # images_discarded_from_buffer = IMG_BUFFER_DISCARD
@@ -85,7 +86,7 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
             # Display Image
             if displaymode: 
                     # the following comments assume subject is about 0.5 m from camera
-                x_offset = 285 #the following values were experimentally obtained
+                x_offset = 300 #the following values were experimentally obtained
                 y_offset = 125 #seems to work on left camera with respective values:
                 x_scale = 5.65    #280,160,6,4
                 y_scale = 4.5
