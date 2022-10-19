@@ -3,6 +3,10 @@ import sys
 import time
 import numpy as np
 from flirpy.camera.lepton import Lepton
+from scipy.ndimage import interpolation
+
+# number to multiply raw thermal data
+THERMAL_CALIBRATION_CONSTANT = 0.00995
 
 thermal_device_id = 2
 # IMG_BUFFER_DISCARD = 1
@@ -18,25 +22,41 @@ image_path = "./imgs/live_test/"
 sys.path.append(openpose_build_path + '/python')
 from openpose import pyopenpose as op
 
-def capture_img(cap, image_path, capname, displaymode,verbose,run_openpose,write_images,openpose_device_id):
+def capture_img(cap, image_path, displaymode,verbose,run_openpose,write_images,openpose_device_id):
     success, img = cap.read()
+    
     if success:
         if write_images:
             cv2.imwrite(image_path,img)
         if verbose:
-            print("\n{} camera cap: success".format(capname))
+            print("\nstereo camera cap success")
     else:
         if verbose:
-            print("\n{} camera cap: failure".format(capname))
+            print("\n{} camera cap failure")
     return img
 
+def capture_thermal_img(cap, image_path, displaymode,verbose,run_openpose,write_images,openpose_device_id):
+    tempmap = cap.grab().astype(np.float32)
+    # convert kelvin to celsius and multiply by some calibration constant
+    tempmap = np.multiply(tempmap,THERMAL_CALIBRATION_CONSTANT) - 273.15
+    # convert celsius to fahrenheit
+    tempmap = np.multiply(tempmap,9/5) +32
+
+    #apply colormap to temp data to make RGB image
+    img = 255*(tempmap - tempmap.min())/(tempmap.max()-tempmap.min())
+    img = cv2.applyColorMap(img.astype(np.uint8),cv2.COLORMAP_INFERNO)
+
+    if write_images:
+        cv2.imwrite(image_path,img)
+    if verbose:
+        print("\nthermal camera cap complete")
+
+    return img, tempmap
 
 def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
     args = (displaymode,verbose,run_openpose,write_images,openpose_device_id)
 
-    # capth = cv2.VideoCapture(thermal_device_id)
-    # capth.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
-    tempcap = Lepton()
+    capth = Lepton()
     cap = cv2.VideoCapture(openpose_device_id)
     cap.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
 
@@ -57,20 +77,10 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
             datum = op.Datum()
 
             time_imcap_th_be = time.time()
-            
-            tempmap = tempcap.grab()
-            print("Thermal camera cap: success")
-            tempmap= np.multiply(tempmap,0.005)
-            tempmap = tempmap - 273.15
-            tempmap = np.multiply(tempmap,9/5) +32
-            #Rescale to 8 bit
-            imagenorm = 255*(tempmap - tempmap.min())/(tempmap.max()-tempmap.min()) 
-            # thermalImageToProcess = cv2.applyColorMap((tempmap/256).astype(np.uint8),cv2.COLORMAP_JET)
-            thermalImageToProcess = cv2.applyColorMap((tempmap/256).astype(np.uint8),cv2.COLORMAP_JET)
-            # thermalImageToProcess = capture_img(capth, image_path+"liveth.png", "thermal", *args)
+            thermalImageToProcess,tempmap = capture_thermal_img(capth, image_path+"liveth.png", *args)
             time_imcap_th_fi = time.time()
             time_imcap_st_be = time.time()
-            imageToProcess = capture_img(cap, image_path+"live.png", "stereo", *args)
+            imageToProcess = capture_img(cap, image_path+"live.png", *args)
             time_imcap_st_fi = time.time()
 
             if run_openpose:
@@ -128,18 +138,14 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                     time_show_be = time.time() 
                     img_combined = datum.cvOutputData 
 
-                    thermalImageToProcess = cv2.resize(thermalImageToProcess,(int(thermalImageToProcess.shape[1]*x_scale),int(thermalImageToProcess.shape[0]*y_scale))) 
-                    
-                    #get temps from thermal image (after resizing)
-                    # n = 0.005
-                    # m = (9/5)
-                    # temps_from_image = np.multiply(tempmap,n)
-                    # temps_from_image = temps_from_image - 273.15
-                    # temps_from_image = np.multiply(temps_from_image,m) +32
-                    # temps_from_image = 255*(temps_from_image - temps_from_image.min())/(temps_from_image.max()-temps_from_image.min())
+                    thermal_img_width = thermalImageToProcess.shape[1]
+                    thermal_img_height = thermalImageToProcess.shape[0]
+
+                    thermalImageToProcess = cv2.resize(thermalImageToProcess,(int(thermal_img_width*x_scale),int(thermal_img_height*y_scale))) 
+                    tempmapscaled = interpolation.zoom(tempmap,(int(thermal_img_width*x_scale),int(thermal_img_height*y_scale)))
 
                     if verbose: 
-                        # print("temps from thermal img", temps_from_image)
+                        print("temps from thermal img", tempmap)
                         print("stereo img shape",img_combined.shape)
                         print("thermal img shape",thermalImageToProcess.shape)
 
