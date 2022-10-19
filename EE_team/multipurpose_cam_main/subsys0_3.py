@@ -2,6 +2,7 @@ import cv2
 import sys
 import time
 import numpy as np
+from flirpy.camera.lepton import Lepton
 
 thermal_device_id = 2
 # IMG_BUFFER_DISCARD = 1
@@ -33,10 +34,11 @@ def capture_img(cap, image_path, capname, displaymode,verbose,run_openpose,write
 def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
     args = (displaymode,verbose,run_openpose,write_images,openpose_device_id)
 
-    capth = cv2.VideoCapture(thermal_device_id)
+    # capth = cv2.VideoCapture(thermal_device_id)
+    # capth.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
+    tempcap = Lepton()
     cap = cv2.VideoCapture(openpose_device_id)
     cap.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
-    capth.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
 
     if not cap.isOpened():
         print("Please make sure 'openpose_device_id' is set to the correct device.")
@@ -53,10 +55,19 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
         while key != ord('q'):
 
             datum = op.Datum()
-            # datum_thermal = op.Datum()
 
             time_imcap_th_be = time.time()
-            thermalImageToProcess = capture_img(capth, image_path+"liveth.png", "thermal", *args)
+            
+            tempmap = tempcap.grab()
+            print("Thermal camera cap: success")
+            tempmap= np.multiply(tempmap,0.005)
+            tempmap = tempmap - 273.15
+            tempmap = np.multiply(tempmap,9/5) +32
+            #Rescale to 8 bit
+            imagenorm = 255*(tempmap - tempmap.min())/(tempmap.max()-tempmap.min()) 
+            # thermalImageToProcess = cv2.applyColorMap((tempmap/256).astype(np.uint8),cv2.COLORMAP_JET)
+            thermalImageToProcess = cv2.applyColorMap((tempmap/256).astype(np.uint8),cv2.COLORMAP_JET)
+            # thermalImageToProcess = capture_img(capth, image_path+"liveth.png", "thermal", *args)
             time_imcap_th_fi = time.time()
             time_imcap_st_be = time.time()
             imageToProcess = capture_img(cap, image_path+"live.png", "stereo", *args)
@@ -118,14 +129,24 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                     img_combined = datum.cvOutputData 
 
                     thermalImageToProcess = cv2.resize(thermalImageToProcess,(int(thermalImageToProcess.shape[1]*x_scale),int(thermalImageToProcess.shape[0]*y_scale))) 
+                    
+                    #get temps from thermal image (after resizing)
+                    # n = 0.005
+                    # m = (9/5)
+                    # temps_from_image = np.multiply(tempmap,n)
+                    # temps_from_image = temps_from_image - 273.15
+                    # temps_from_image = np.multiply(temps_from_image,m) +32
+                    # temps_from_image = 255*(temps_from_image - temps_from_image.min())/(temps_from_image.max()-temps_from_image.min())
+
                     if verbose: 
+                        # print("temps from thermal img", temps_from_image)
                         print("stereo img shape",img_combined.shape)
                         print("thermal img shape",thermalImageToProcess.shape)
 
                     img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
                     
                     # add forehead marker (if applicable)
-                    if run_openpose:
+                    if run_openpose and datum.poseKeypoints is not None:
                         forehead_marker_color = (0,0,0)
 
                         for person_forehead in foreheads:
@@ -186,5 +207,5 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                 key = cv2.waitKey(1)
 
         #cap.release()
-        capth.release()
+        # capth.release()
         cv2.destroyAllWindows()
