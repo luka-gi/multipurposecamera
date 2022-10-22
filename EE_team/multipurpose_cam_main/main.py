@@ -5,12 +5,12 @@ import subsys0_1,subsys0_3
 if __name__ == "__main__":  
     parser = argparse.ArgumentParser(description='Args for multipurposecamera script. All false by default')
     parser.add_argument('-v','--verbose', action='store_true', help='verbose output')
-    parser.add_argument('-d','--display', action='store_true', help='display images to monitor')
+    parser.add_argument('-o','--display', action='store_true', help='output display images to monitor')
     parser.add_argument('-p','--process', action='store_true', help='process using openpose (default off to save memory)')
     parser.add_argument('-w','--write', action='store_true', help='save images to disk')
     parser.add_argument('-a','--all', action='store_true', help='enable all options')
     parser.add_argument('-s','--subsystem',type=int, help="specify subsystem to test (0 = all or highest level)",nargs='?', const=1, default=0)
-    parser.add_argument('--device', type=int, help='specify device number',nargs='?', const=1, default=3)
+    parser.add_argument('-d','--device', type=int, help='specify device number',nargs='?', const=1, default=3)
 
     args = parser.parse_args()
 

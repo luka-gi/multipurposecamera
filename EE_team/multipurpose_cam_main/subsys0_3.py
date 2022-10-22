@@ -49,7 +49,8 @@ def capture_thermal_img(cap, image_path, displaymode,verbose,run_openpose,write_
     if write_images:
         cv2.imwrite(image_path,img)
     if verbose:
-        print("\nthermal camera cap complete")
+        print("\nthermal camera cap complete. displaying temps in F")
+        print(tempmap)
 
     return img, tempmap
 
@@ -105,23 +106,22 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         key_eye_R = person[15][0:-1]
                         key_eye_L = person[16][0:-1]
 
-                        if verbose:
-                            print("person "+ str(person_num) +"'s nose coords:" + str(nose))
-                            print("person "+ str(person_num) +"'s eyeL coords:" + str(key_eye_L))
-                            print("person "+ str(person_num) +"'s eyeR coords:" + str(key_eye_R))
-
                         #math is included in report
                         eyes_midpoint = np.array([key_eye_R[0]+(key_eye_L[0]-key_eye_R[0])/2,
                                 key_eye_L[1]+(key_eye_R[1]-key_eye_L[1])/2])
                         
-                        eyes_midpoint_to_nose_scalefactor = 1.6
+                        eyes_midpoint_to_nose_scalefactor = 1.3
                         forehead = eyes_midpoint-eyes_midpoint_to_nose_scalefactor*(nose-eyes_midpoint)
 
                         foreheads[person_num] = forehead
 
-                        person_num = person_num + 1
+                        if verbose:
+                            print("person "+ str(person_num) +"'s nose coords: " + str(nose))
+                            print("person "+ str(person_num) +"'s eyeL coords: " + str(key_eye_L))
+                            print("person "+ str(person_num) +"'s eyeR coords: " + str(key_eye_R))
+                            print("person "+ str(person_num) +"'s forehead coords: " + str(forehead))
 
-                    print("foreheads:",foreheads)
+                        person_num = person_num + 1
 
             if verbose:
                 print()
@@ -138,27 +138,54 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                     time_show_be = time.time() 
                     img_combined = datum.cvOutputData 
 
-                    thermal_img_width = thermalImageToProcess.shape[1]
-                    thermal_img_height = thermalImageToProcess.shape[0]
+                    print("stereo img shape",img_combined.shape)
+                    print("thermal img shape",thermalImageToProcess.shape)
 
-                    thermalImageToProcess = cv2.resize(thermalImageToProcess,(int(thermal_img_width*x_scale),int(thermal_img_height*y_scale))) 
-                    tempmapscaled = interpolation.zoom(tempmap,(int(thermal_img_width*x_scale),int(thermal_img_height*y_scale)))
+                    thermalImageToProcess = cv2.resize(thermalImageToProcess,(int(thermalImageToProcess.shape[1]*x_scale),int(thermalImageToProcess.shape[0]*y_scale))) 
+                    # thermalImageToProcess = interpolation.zoom(thermalImageToProcess,[y_scale,x_scale,1])
+                    tempmapscaled = interpolation.zoom(tempmap,[y_scale,x_scale])
 
-                    if verbose: 
-                        print("temps from thermal img", tempmap)
+                    if verbose:                         
                         print("stereo img shape",img_combined.shape)
                         print("thermal img shape",thermalImageToProcess.shape)
+                        print("tempmap scaled shape", tempmapscaled.shape)
 
                     img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
-                    
-                    # add forehead marker (if applicable)
+                                        
                     if run_openpose and datum.poseKeypoints is not None:
-                        forehead_marker_color = (0,0,0)
+                        person_num = 0
+                        foreheads_temps = [0] * len(datum.poseKeypoints)
+                        
+                        for person_forehead in foreheads:  
+                            # add forehead marker (if applicable)
+                            forehead_marker_color = (255,255,255)
 
-                        for person_forehead in foreheads:
                             cv2.drawMarker(img_combined,(int(person_forehead[0]),int(person_forehead[1])), forehead_marker_color,
-                             markerType=cv2.MARKER_DIAMOND, markerSize=10, thickness=10, line_type=cv2.LINE_AA)
+                            markerType=cv2.MARKER_DIAMOND, markerSize=10, thickness=10, line_type=cv2.LINE_AA)
+
+                            #make sure detected forehead is in range of thermal cam otherwise program will crash or report incorrect value
+                            # please do not confuse forehead[0] (x value) with .shape[0] (y_value). I don't know why images are heightxwidth here
+                            # set out of bound forehead temp to None to reduce ambiguity
+                            if (x_offset < forehead[0] and forehead[0] < x_offset + thermalImageToProcess.shape[1] and y_offset < forehead[1] and forehead[1] < y_offset + thermalImageToProcess.shape[0]):
+                                font = cv2.FONT_HERSHEY_COMPLEX
+                                scale = 1
+                                color = (255,255,255)
+                                thickness = 1
+                                lineType = 2
+
+                                forehead_temp = tempmapscaled[int(person_forehead[1]-y_offset),int(person_forehead[0]-x_offset)]
+                                foreheads_temps[person_num] = forehead_temp
+                                cv2.putText(img_combined,"{:.2f}F".format(forehead_temp),(int(person_forehead[0]+10),int(person_forehead[1]-10)),
+                                    font, scale, color, thickness, lineType)
+                                if verbose:
+                                    print("\nperson "+ str(person_num) +"'s forehead temperature: " + str(foreheads_temps[person_num]) + "\u00B0F\n")
+                            else:
+                                foreheads_temps[person_num] = None                        
+                            
+                            person_num = person_num + 1
+                            
                     cv2.imshow("output display",img_combined)
+
                     time_show_fi = time.time()
 
                     if verbose:
