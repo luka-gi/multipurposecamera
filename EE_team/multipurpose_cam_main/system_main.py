@@ -7,8 +7,11 @@ from scipy.ndimage import interpolation
 
 # number to multiply raw thermal data
 THERMAL_CALIBRATION_CONSTANT = 0.00995
+# a feverish temperature to use as a threshold. right not this is in degrees F
+FEVER_TEMP = 100
 
 thermal_device_id = 2
+# IMG_BUFFER_DISCARD = 1
 CAP_BUFFER_SIZE = 1
 
 #venv paths
@@ -145,13 +148,16 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         print("stereo img shape",img_combined.shape)
                         print("thermal img shape",thermalImageToProcess.shape)
                         print("tempmap scaled shape", tempmapscaled.shape)
+
+                    img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
                                         
 # ====================================================================================================================
                     # forehead fever detection
 
                     if run_openpose and datum.poseKeypoints is not None:
                         person_num = 0
-                        foreheads_temps = [0] * len(datum.poseKeypoints)
+                        # this array has the format [forehead_temp,has_fever]
+                        foreheads_temps = [[0,False]] * len(datum.poseKeypoints)
                         
                         for person_forehead in foreheads:  
                             # add forehead marker (if applicable)
@@ -171,14 +177,29 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                                 lineType = 2
 
                                 forehead_temp = tempmapscaled[int(person_forehead[1]-y_offset),int(person_forehead[0]-x_offset)]
-                                foreheads_temps[person_num] = forehead_temp
+# ====================================================================================================================
+                                # fever detection - final module of subsys 0.3              
+                                has_fever = forehead > FEVER_TEMP
+# ====================================================================================================================
+                                foreheads_temps[person_num] = forehead_temp,has_fever
                                 cv2.putText(img_combined,"{:.2f}F".format(forehead_temp),(int(person_forehead[0]+10),int(person_forehead[1]-10)),
                                     font, scale, color, thickness, lineType)
                                 if verbose:
-                                    print("\nperson "+ str(person_num) +"'s forehead temperature reads: " + str(foreheads_temps[person_num]) + "\u00B0F\n")
+                                    print("\nperson "+ str(person_num) +"'s forehead temperature reads: " + str(foreheads_temps[person_num][0]) + "\u00B0F\n")
+                                
+                                if has_fever:
+                                    cv2.putText(img_combined,"FEVER",(int(person_forehead[0]+10),int(person_forehead[1])),
+                                    font, scale, color, thickness, lineType)
+                                    if verbose:
+                                        print()
+                                else:
+                                    cv2.putText(img_combined,"NO FEVER",(int(person_forehead[0]+10),int(person_forehead[1])),
+                                    font, scale, color, thickness, lineType)
+                                    if verbose:
+                                        print()
 # ====================================================================================================================
                             else:
-                                foreheads_temps[person_num] = None                        
+                                foreheads_temps[person_num][0] = None                        
                             
                             person_num = person_num + 1
                             
@@ -213,7 +234,6 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         print("stereo img shape",img_combined.shape)
                         print("thermal img shape",thermalImageToProcess.shape)
 
-                    img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
                     cv2.imshow("output display",img_combined)
                     time_show_fi = time.time() 
                     if verbose:
