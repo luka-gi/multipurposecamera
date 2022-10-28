@@ -1,6 +1,6 @@
 import sys
 import argparse
-import subsys0_1,subsys0_3
+import subsys0_1,subsys0_3,full_system
 
 if __name__ == "__main__":  
     parser = argparse.ArgumentParser(description='Args for multipurposecamera script. All false by default')
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     args = (displaymode,verbose,run_openpose,write_images,openpose_device_id)
 
     if subsystem_to_test == 0:
-        print()
+        full_system.run(*args)
     if subsystem_to_test == 1:
         subsys0_1.run(*args)
     if subsystem_to_test == 2:
