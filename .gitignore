@@ -1,3 +1,5 @@
 *.ogv
 /EE_team/resources/record_tests/*
+/EE_team/multipurpose_cam_main/utils/test_equipment/depthmap/stereoLeft/imageL/*
+/EE_team/multipurpose_cam_main/utils/test_equipment/depthmap/stereoright/imageR/*
 .token.txt
