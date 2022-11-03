@@ -7,8 +7,6 @@ from scipy.ndimage import interpolation
 
 # number to multiply raw thermal data
 THERMAL_CALIBRATION_CONSTANT = 0.00995
-# number of forehead temps to take before running statistical analysis. excluded for now. see function details
-# NUM_FOREHEAD_TEMPS_PER_LOOP = 30
 # a feverish temperature to use as a threshold. right not this is in degrees F
 FEVER_TEMP = 100
 
@@ -64,10 +62,6 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
     capth = Lepton()
     cap = cv2.VideoCapture(openpose_device_id)
     cap.set(cv2.CAP_PROP_BUFFERSIZE,CAP_BUFFER_SIZE)
-
-    #initialization in order to run statistic analysis in loop. excluded for now. see function details.
-    # forehead_temps_loop = 0
-    # forehead_stats = [0] * NUM_FOREHEAD_TEMPS_PER_LOOP
 
     if not cap.isOpened():
         print("Please make sure 'openpose_device_id' is set to the correct device.")
@@ -184,35 +178,6 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
 
                                 forehead_temp = tempmapscaled[int(person_forehead[1]-y_offset),int(person_forehead[0]-x_offset)]
 # ====================================================================================================================
-# see test 0.3.3 rev 1 and COF 0.3.3.1 details for why this is excluded
-                                # # temperature statistics
-
-                                # # now save this value to perform statistical analysis
-                                # # assume same person is person0 in frame the whole time. if we're in this loop we know that there is at least 1 person detected.
-                                # forehead_stats[forehead_temps_loop] = forehead_temp
-                                # forehead_temps_loop = forehead_temps_loop + 1
-                                # if forehead_temps_loop >= NUM_FOREHEAD_TEMPS_PER_LOOP: 
-                                #     num_std_filter = 1
-
-                                #     avg = np.mean(forehead_stats)
-                                #     std = np.std(forehead_stats)
-                                    
-                                #     filtered_stats = []
-                                #     for temp in forehead_stats:
-                                #         if avg-num_std_filter*std < temp and temp < avg+num_std_filter*std:
-                                #             filtered_stats.append(temp)
-
-                                #     filtered_avg = np.mean(filtered_stats)
-
-                                #     if verbose:
-                                #         print("forehead_stats",forehead_stats)
-                                #         print("avg",avg)
-                                #         print("std",std)
-                                #         print("filtered_stats",filtered_stats)
-                                #         print("filtered_avg",filtered_avg)
-                                    
-# ====================================================================================================================
-# ====================================================================================================================
                                 # fever detection - final module of subsys 0.3              
                                 has_fever = forehead > FEVER_TEMP
 # ====================================================================================================================
@@ -269,7 +234,6 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         print("stereo img shape",img_combined.shape)
                         print("thermal img shape",thermalImageToProcess.shape)
 
-                    img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
                     cv2.imshow("output display",img_combined)
                     time_show_fi = time.time() 
                     if verbose:
