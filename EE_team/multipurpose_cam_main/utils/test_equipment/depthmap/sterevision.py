@@ -47,10 +47,10 @@ while(cap_right.isOpened() and cap_left.isOpened()):
     # stereo = cv2.StereoBM_create(numDisparities=144, blockSize=23)
     disparity = stereo.compute(frame_left,frame_right)
     print(type(disparity[0][0]))
-    # print(disparity)
+    print(disparity)
 
     # speckle filter
-    disparity,_= cv2.filterSpeckles(disparity,0,4000,128-10)
+    disparity,_= cv2.filterSpeckles(disparity,0,2000,128-10)
 
     # Show the frames
     print(stereo)

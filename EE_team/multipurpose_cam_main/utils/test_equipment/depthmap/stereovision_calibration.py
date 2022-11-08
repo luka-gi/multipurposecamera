@@ -9,7 +9,7 @@ pathR= "./stereoright/imageR"
 ################ FIND CHESSBOARD CORNERS - OBJECT POINTS AND IMAGE POINTS #############################
 
 chessboardSize = (6,8)
-frameSize = (1280,720)
+frameSize = (1640,1232)
 
 # termination criteria
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -19,7 +19,7 @@ criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 objp = np.zeros((chessboardSize[0] * chessboardSize[1], 3), np.float32)
 objp[:,:2] = np.mgrid[0:chessboardSize[0],0:chessboardSize[1]].T.reshape(-1,2)
 
-size_of_chessboard_squares_mm = 23.5
+size_of_chessboard_squares_mm = 22.5
 objp = objp * size_of_chessboard_squares_mm
 
 # Arrays to store object points and image points from all the images.
@@ -36,8 +36,8 @@ for imgLeft, imgRight in zip(imagesLeft, imagesRight):
 
     imgL = cv.imread(imgLeft)
     imgR = cv.imread(imgRight)
-    grayL = cv.cvtColor(imgL, cv.COLOR_BGR2GRAY)
-    grayR = cv.cvtColor(imgR,cv.COLOR_BGR2GRAY)
+    grayL = cv.cvtColor(imgL, cv.COLOR_RGB2GRAY)
+    grayR = cv.cvtColor(imgR,cv.COLOR_RGB2GRAY)
     
 
     # Find the chess board corners
@@ -49,10 +49,10 @@ for imgLeft, imgRight in zip(imagesLeft, imagesRight):
 
         objpoints.append(objp)
 
-        cornersL = cv.cornerSubPix(grayL, cornersL, (11,11), (-1,-1), criteria)
+        cornersL = cv.cornerSubPix(grayL, cornersL, (20,20), (-1,-1), criteria)
         imgpointsL.append(cornersL)
 
-        cornersR = cv.cornerSubPix(grayR, cornersR, (11,11), (-1,-1), criteria)
+        cornersR = cv.cornerSubPix(grayR, cornersR, (20,20), (-1,-1), criteria)
         imgpointsR.append(cornersR)
 
         # Draw and display the corners
