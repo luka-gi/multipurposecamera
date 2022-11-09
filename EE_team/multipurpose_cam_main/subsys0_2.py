@@ -75,7 +75,47 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
 
             if write_images:
                 cv2.imwrite(image_path+"op.png",datum.cvOutputData)
+# ====================================================================================================================
+            # lifting all of the keypoints to 3D based on the depthmap readings
+            if datum.poseKeypoints is not None:
+                people_3D = [[0]*datum.poseKeypoints[0]] * len(datum.poseKeypoints)
 
+                for person in range(len(datum.poseKeypoints)):                    
+                    for keypoint in range(len(datum.poseKeypoints[person])):
+                        (X,Y,confidence) = datum.poseKeypoints[person][keypoint]
+                        #this is the default value if keypoint is not detected
+                        if(X == 0 and Y == 0):
+                            Z = 0
+                        else:
+                            Z = disparity_normalized[int(Y)][int(X)]
+                        # the Z value is in centimeters by default
+                        people_3D[person][keypoint] = [X,Y,Z]
+                        
+                if verbose:
+                    print("coordinates of 3D lifted people")
+                    print(people_3D)
+# ====================================================================================================================
+# ====================================================================================================================
+                # now we can iterate through to determine distances between people
+                num_people = len(datum.poseKeypoints)
+                # create a matrix so that mat[p0][p1] refers to distance from p0 to p1
+                depth_pairs = [[0]*num_people] * num_people
+                # body_25 model point which labels the torso of a person
+                torso_keypoint = 1
+                for person1 in range(num_people):
+                    for person2 in range(num_people):
+                        # if person or equal or keypoint (chest) is not detected on either person, skip the calculation
+                            # failsafe distance: 0
+                        if (person1 == person2) or (people_3D[person1][torso_keypoint] == [0,0,0]).all() or (people_3D[person2][torso_keypoint] == [0,0,0]).all():
+                            distance_between = 0
+                        else:
+                            distance_between = abs(people_3D[person1][torso_keypoint][2] - people_3D[person2][torso_keypoint])
+                    depth_pairs[person1][person2] = distance_between
+
+                if verbose:
+                    print("matrix of pairs of people and distances between")
+                    print(depth_pairs)
+# ====================================================================================================================
         if verbose:
             print("Body keypoints: \n" + str(datum.poseKeypoints))
 
@@ -94,11 +134,12 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
             #so most of the disparity map is blank and only has output to the actual capture resolution
             x_offset = 0
             y_offset = 47
-            print("DISPSHAPE",disparity_color.shape)
-            disparity_color = disparity_color[y_offset:y_offset+H,x_offset:x_offset+W]
 
-            print("DISPSHAPE",disparity_color.shape)
-            print("STEREOSHAPE",stereo_image.shape)
+            if verbose:
+                print("disparitymap shape:",disparity_color.shape)
+                print("stereo image shape:",stereo_image.shape)
+
+            disparity_color = disparity_color[y_offset:y_offset+H,x_offset:x_offset+W]
 
             cv2.imshow("stereo_display",stereo_image)
             output = cv2.addWeighted(stereo_image, 0.5, disparity_color, 0.5, 0.0)
