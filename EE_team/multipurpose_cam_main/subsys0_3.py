@@ -133,7 +133,6 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         person_num = person_num + 1
 # ====================================================================================================================
             if verbose:
-                print()
                 print("Body keypoints: \n" + str(datum.poseKeypoints))
 
             # Display Image
