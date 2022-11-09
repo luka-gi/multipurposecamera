@@ -179,7 +179,7 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                                 forehead_temp = tempmapscaled[int(person_forehead[1]-y_offset),int(person_forehead[0]-x_offset)]
 # ====================================================================================================================
                                 # fever detection - final module of subsys 0.3              
-                                has_fever = forehead > FEVER_TEMP
+                                has_fever = forehead_temp > FEVER_TEMP
 # ====================================================================================================================
                                 foreheads_temps[person_num] = forehead_temp,has_fever
                                 cv2.putText(img_combined,"{:.2f}F".format(forehead_temp),(int(person_forehead[0]+10),int(person_forehead[1]-10)),
@@ -188,12 +188,12 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                                     print("\nperson "+ str(person_num) +"'s forehead temperature reads: " + str(foreheads_temps[person_num][0]) + "\u00B0F\n")
                                 
                                 if has_fever:
-                                    cv2.putText(img_combined,"FEVER",(int(person_forehead[0]+10),int(person_forehead[1])),
+                                    cv2.putText(img_combined,"FEVER",(int(person_forehead[0]+20),int(person_forehead[1]+20)),
                                     font, scale, color, thickness, lineType)
                                     if verbose:
                                         print()
                                 else:
-                                    cv2.putText(img_combined,"NO FEVER",(int(person_forehead[0]+10),int(person_forehead[1])),
+                                    cv2.putText(img_combined,"NO FEVER",(int(person_forehead[0]+20),int(person_forehead[1]+20)),
                                     font, scale, color, thickness, lineType)
                                     if verbose:
                                         print()
