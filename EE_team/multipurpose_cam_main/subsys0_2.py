@@ -4,8 +4,9 @@ import numpy as np
 from time import time
 from stereovision.calibration import StereoCalibration
 sys.path.insert(0,"./utils/test_equipment/StereoVision/main_scripts")
+sys.path.insert(0,"./utils/test_equipment")
 depthmap = __import__("5_depthmap")
-from start_cameras import Start_Cameras
+from modified_start_cameras import Start_Cameras
 
 #venv paths
 NVIDIA_python2_path = "/usr/bin/python"
