@@ -187,4 +187,5 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
             key = cv2.waitKey(1)
 
     cap.release()
+    cap2.release()
     cv2.destroyAllWindows()

@@ -138,8 +138,8 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
             # Display Image
             if displaymode: 
                     # the following comments assume subject is about 0.5 m from camera
-                x_offset = 260 #the following values were experimentally obtained
-                y_offset = 125 #seems to work on left camera with respective values:
+                x_offset = 285 #the following values were experimentally obtained
+                y_offset = 105 #seems to work on left camera with respective values:
                 x_scale = 5.65    #280,160,6,4
                 y_scale = 4.5
                 if run_openpose:
@@ -154,6 +154,7 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         print("thermal img shape",thermalImageToProcess.shape)
                         print("tempmap scaled shape", tempmapscaled.shape)
 
+                    thermalImageToProcess = cv2.addWeighted(img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]],0.35,thermalImageToProcess,0.65,0.0)
                     img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
                                         
 # ====================================================================================================================
@@ -268,7 +269,6 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         print("stereo img shape",img_combined.shape)
                         print("thermal img shape",thermalImageToProcess.shape)
 
-                    img_combined[y_offset:y_offset+thermalImageToProcess.shape[0],x_offset:x_offset+thermalImageToProcess.shape[1]] = thermalImageToProcess
                     cv2.imshow("output display",img_combined)
                     time_show_fi = time.time() 
                     if verbose:
