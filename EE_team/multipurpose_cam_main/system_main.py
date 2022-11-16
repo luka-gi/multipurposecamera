@@ -1,5 +1,6 @@
 import cv2
 import sys
+import math
 import time
 import numpy as np
 from flirpy.camera.lepton import Lepton
@@ -192,7 +193,7 @@ def run(displaymode,verbose,run_openpose,write_images,openpose_device_id):
                         if (person1 == person2) or (people_3D[person1][torso_keypoint] == [0,0,0]).all() or (people_3D[person2][torso_keypoint] == [0,0,0]).all():
                             distance_between = 0
                         else:
-                            distance_between = abs(people_3D[person1][torso_keypoint][2] - people_3D[person2][torso_keypoint][2])
+                            distance_between = math.sqrt(pow(people_3D[person1][torso_keypoint][2],2) + pow(people_3D[person2][torso_keypoint][2],2))
                         depth_pair.append(distance_between)
                     depth_pairs.append(depth_pair)
                 depth_pairs = np.array(depth_pairs)
